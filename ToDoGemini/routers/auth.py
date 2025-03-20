@@ -1,4 +1,4 @@
-from fastapi import APIRouter,Depends,HTTPException
+from fastapi import APIRouter,Depends,HTTPException,Request
 from pyasn1_modules.rfc7508 import Algorithm
 from pydantic import BaseModel
 from passlib.context import CryptContext
@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from starlette import status
 from jose import jwt,JWTError
 from datetime import timedelta,datetime,timezone
-
+from fastapi.templating import Jinja2Templates
 from database import SessionLocal
 from models import User
 
@@ -16,6 +16,9 @@ router=APIRouter(
     prefix="/auth",
     tags=["Authentication"],
 )
+
+templates=Jinja2Templates(directory="templates")
+
 SECRET_KEY="gis4gdxvgbjlulsj9hinit0dqvmts68gfvvndcjtusr866gbppioqczo6tukib7z"
 ALGORITHM="HS256"
 
@@ -70,6 +73,14 @@ async def get_current_user(token: Annotated[str,Depends(oauth2_bearer)]):
         return {'username':username,'id':user_id,'user_role':user_role}
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Token is invaild")
+
+@router.get("/login-page")
+def render_login_page(request:Request):
+    return templates.TemplateResponse("login.html",{"request":request})
+
+@router.get("/register-page")
+def render_register_page(request:Request):
+    return templates.TemplateResponse("register.html",{"request":request})
 
 
 @router.post("/",status_code=status.HTTP_201_CREATED)
