@@ -1,3 +1,5 @@
+from urllib import response
+
 from fastapi import APIRouter,Depends,Path,HTTPException,Request,Response
 from typing import Annotated
 from pydantic import BaseModel,Field
@@ -143,14 +145,20 @@ def markdown_to_text(markdown_string:str):
     text=soup.get_text()
     return text
 
-def create_todo_with_gemini(todo_string:str):
+
+def create_todo_with_gemini(todo_string: str):
     load_dotenv()
     genai.configure(api_key=os.environ.get('GOOGLE_API_KEY'))
-    llm=ChatGoogleGenerativeAI(model="gemini-pro")
-    llm.invoke(
-         [
-            HumanMessage(content="I will provide you a todo item to add my to do list.What I want you to do is to create a longer and more comprehensive description of that todo item,my next message will be my todo:"),
-             HumanMessage(content=todo_string),
+    llm = ChatGoogleGenerativeAI(model="gemini-1.5-pro")
+
+    response = llm.invoke(
+        [
+            HumanMessage(
+                content="I will provide you a todo item to add to my to-do list. What I want you to do is create a longer and more comprehensive description of that to-do item. My next message will be my to-do:"),
+            HumanMessage(content=todo_string),
         ]
     )
-    return markdown_to_text(response.content)
+    if isinstance(response, AIMessage):
+        return markdown_to_text(response.content)
+
+    return "Error generating description."
