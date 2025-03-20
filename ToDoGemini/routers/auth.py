@@ -9,15 +9,15 @@ from starlette import status
 from jose import jwt,JWTError
 from datetime import timedelta,datetime,timezone
 from fastapi.templating import Jinja2Templates
-from database import SessionLocal
-from models import User
+from ..database import SessionLocal
+from ..models import User
 
 router=APIRouter(
     prefix="/auth",
     tags=["Authentication"],
 )
 
-templates=Jinja2Templates(directory="templates")
+templates=Jinja2Templates(directory="app/templates")
 
 SECRET_KEY="gis4gdxvgbjlulsj9hinit0dqvmts68gfvvndcjtusr866gbppioqczo6tukib7z"
 ALGORITHM="HS256"
